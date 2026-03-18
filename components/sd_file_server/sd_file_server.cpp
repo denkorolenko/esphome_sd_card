@@ -36,7 +36,7 @@ void SDFileServer::handleRequest(AsyncWebServerRequest *request) {
       this->handle_get(request);
       return;
     }
-    if (request->method() == HTTP_DELETE) {
+    if (request->method() == HTTP_POST && request->hasParam("DELETE")) {
       this->handle_delete(request);
       return;
     }
@@ -297,7 +297,7 @@ void SDFileServer::handle_index(AsyncWebServerRequest *request, std::string cons
 
   response->print("</tbody></table>"
                     "<script>"
-                    "function delete_file(path) {fetch(path, {method: \"DELETE\"});}"
+                    "function delete_file(path) {fetch(path + '?DELETE', {method: \"POST\"})}"
                     "function download_file(path, filename) {"
                     "fetch(path).then(response => response.blob())"
                     ".then(blob => {"
