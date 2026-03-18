@@ -30,16 +30,23 @@ bool SDFileServer::canHandle(AsyncWebServerRequest *request) const {
 }
 
 void SDFileServer::handleRequest(AsyncWebServerRequest *request) {
-  ESP_LOGD(TAG, "%s", request->url().c_str());
+  ESP_LOGD(TAG, "handleRequest: method=%d url=%s", request->method(), request->url().c_str());
   if (str_startswith(std::string(request->url().c_str()), this->build_prefix())) {
     if (request->method() == HTTP_GET) {
+      ESP_LOGD(TAG, "handleRequest: dispatching to handle_get");
       this->handle_get(request);
       return;
     }
     if (request->method() == HTTP_POST && request->hasParam("DELETE")) {
+      ESP_LOGD(TAG, "handleRequest: dispatching to handle_delete");
       this->handle_delete(request);
       return;
     }
+    if (request->method() == HTTP_POST) {
+      ESP_LOGD(TAG, "handleRequest: Unhandled POST request");
+      return;
+    }
+    ESP_LOGW(TAG, "handleRequest: unhandled method=%d url=%s", request->method(), request->url().c_str());
   }
 }
 
@@ -297,7 +304,7 @@ void SDFileServer::handle_index(AsyncWebServerRequest *request, std::string cons
 
   response->print("</tbody></table>"
                     "<script>"
-                    "function delete_file(path) {fetch(path + '?DELETE', {method: \"POST\"})}"
+                    "function delete_file(path) {fetch(path + '?DELETE=true', {method: \"POST\"})}"
                     "function download_file(path, filename) {"
                     "fetch(path).then(response => response.blob())"
                     ".then(blob => {"
